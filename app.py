@@ -219,8 +219,10 @@ def vote_for_category():
 
             if user_id:
                 try:
-                    # Call the modified stored procedure for voting
-                    cursor.callproc("VoteForCategory", (int(user_id), category, selected_title))
+                    # Insert a new row into the votes table, triggering the UpdateVoteCounts trigger
+                    cursor.execute("INSERT INTO votes (user_id, category, item_name, vote_count) VALUES (%s, %s, %s, 1)",
+                                   (int(user_id), category, selected_title))
+                    connection.commit()  # Commit the changes to trigger the trigger
                     st.success(f"Vote recorded successfully for {selected_title} in {category}")
 
                 except mysql.connector.Error as err:
